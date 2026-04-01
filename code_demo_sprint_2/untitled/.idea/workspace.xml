@@ -15,15 +15,15 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.Main.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "kotlin-language-version-configured": "true",
-    "onboarding.tips.debug.path": "D:/working/VRPTW/code_demo_sprint_2/untitled/src/Main.java"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;D:/working/VRPTW/code_demo_sprint_2/untitled/src/Main.java&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="69945132-072a-4c8e-bcc7-cddc437138a4" name="Changes" comment="" />
@@ -33,6 +33,9 @@
       <updated>1774753572056</updated>
       <workItem from="1774753573098" duration="35000" />
       <workItem from="1774753640721" duration="191000" />
+      <workItem from="1774926980735" duration="4000" />
+      <workItem from="1774987300277" duration="25000" />
+      <workItem from="1775025091096" duration="1363000" />
     </task>
     <servers />
   </component>
