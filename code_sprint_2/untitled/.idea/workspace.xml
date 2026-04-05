@@ -20,6 +20,7 @@
     &quot;Application.Main.executor&quot;: &quot;Run&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
     &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
     &quot;onboarding.tips.debug.path&quot;: &quot;D:/working/VRPTW/code_demo_sprint_2/untitled/src/Main.java&quot;
   }
@@ -36,6 +37,9 @@
       <workItem from="1774926980735" duration="4000" />
       <workItem from="1774987300277" duration="25000" />
       <workItem from="1775025091096" duration="1363000" />
+      <workItem from="1775026759670" duration="2291000" />
+      <workItem from="1775066570251" duration="1851000" />
+      <workItem from="1775087594963" duration="27000" />
     </task>
     <servers />
   </component>
