@@ -7,6 +7,13 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -17,9 +24,11 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.DataSeeder.executor": "Run",
     "Application.Main.executor": "Run",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "kotlin-language-version-configured": "true",
     "onboarding.tips.debug.path": "D:/working/VRPTW/code_sprint_3/untitled/src/Main.java"
   }
@@ -33,6 +42,12 @@
       <updated>1775352609793</updated>
       <workItem from="1775352611217" duration="342000" />
       <workItem from="1775353531898" duration="2715000" />
+      <workItem from="1775481055307" duration="341000" />
+      <workItem from="1775481426932" duration="21000" />
+      <workItem from="1775528115207" duration="73000" />
+      <workItem from="1775549061728" duration="1576000" />
+      <workItem from="1775631011240" duration="288000" />
+      <workItem from="1775632126233" duration="4833000" />
     </task>
     <servers />
   </component>

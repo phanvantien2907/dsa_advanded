@@ -1,5 +1,10 @@
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.*;
+
 
 /**
  * ═══════════════════════════════════════════════════════════════
@@ -11,7 +16,7 @@ import java.util.stream.*;
  */
 public class Main {
 
-    // ── Hằng số hệ thống ───────────────────────────────────────
+    // ── Thông số hệ thống ───────────────────────────────────────
     static final double SPEED     = 30.0;   // km/h
     static final int    DUMP_SVC  = 1800;   // 30 phút xả rác (giây)
     static final double MAX_VOL   = 8.0;    // m³/xe
@@ -23,96 +28,144 @@ public class Main {
     static final int    LUNCH_D   = 3600;   // 1 tiếng
 
     public static void main(String[] args) {
-        Depot depot = new Depot(0, 0);
-        List<DumpSite> dumps = Arrays.asList(
-                new DumpSite("DS1",  5,  5),
-                new DumpSite("DS2", -4,  6));
-        List<Stop> stops = makeStops();
+        String[] files = {
+                "102_stop.txt", "277_stop.txt", "335_stop.txt",
+                "444_stop.txt", "804_stop.txt", "1051_stop.txt",
+                "1351_stop.txt", "1599_stop.txt", "1932_stop.txt", "2100_stop.txt"
+        };
 
-        banner("VRPTW THU GOM RÁC — DEMO CHƯƠNG 4 + 5 + 6");
-        System.out.printf("  Tổng %d điểm dừng | 2 Dump sites | Max xe: 8m³/1000kg%n%n",
-                stops.size());
+        banner("BẮT ĐẦU CHẠY BENCHMARK ĐA LUỒNG (BATCH PROCESSING)");
+        System.out.println("Đang xử lý " + files.length + " files song song. Vui lòng đợi trong ít phút...\n");
 
-        section("THUẬT TOÁN CHÈN MỞ RỘNG (Extended Insertion)");
-        Solution sol4 = new ExtendedInsertion(depot, dumps).solve(deepCopy(stops));
-        printSol("Ch4-Insertion", sol4);
+        long totalStartTime = System.currentTimeMillis();
 
-        section("THUẬT TOÁN PHÂN CỤM (Clustering-based VRPTW)");
-        Solution sol5 = new ClusteringVRPTW(depot, dumps).solve(deepCopy(stops));
-        printSol("Ch5-Clustering", sol5);
+        // CHẠY ĐA LUỒNG (Mỗi file 1 luồng xử lý riêng biệt)
+        List<BenchmarkResult> results = Arrays.stream(files)
+                .parallel()
+                .map(Main::runSingleBenchmark)
+                .collect(Collectors.toList());
 
-        section("SO SÁNH KẾT QUẢ THỰC NGHIỆM");
-        Ch6Compare.run(sol4, sol5);
+        long totalEndTime = System.currentTimeMillis();
+
+        // In bảng kết quả
+        printFinalReportTable(results, totalEndTime - totalStartTime);
     }
 
+    /**
+     * Hàm chạy benchmark cho từng file (Chạy ngầm đa luồng)
+     */
+    private static BenchmarkResult runSingleBenchmark(String fileName) {
+        List<Stop> stops = DataLoader.loadStops(fileName);
+        BenchmarkResult result = new BenchmarkResult(fileName, stops.size());
+
+        // Nếu file không tồn tại hoặc lỗi, trả về kết quả rỗng
+        if (stops.isEmpty()) return result;
+
+        Depot depot = new Depot(0, 0);
+        // Khởi tạo 2 bãi rác (Tọa độ giả lập rộng hơn để phù hợp với map +/-5000)
+        List<DumpSite> dumps = Arrays.asList(
+                new DumpSite("DS1", 10, 15),
+                new DumpSite("DS2", -12, -18));
+
+        try {
+            // Chạy Ch4 - Thuật toán chèn cơ sở
+            long t1 = System.currentTimeMillis();
+            Solution sol4 = new ExtendedInsertion(depot, dumps).solve(deepCopy(stops));
+            long t2 = System.currentTimeMillis();
+
+            result.v4 = sol4.routes.size();
+            result.td4 = sol4.routes.stream().mapToDouble(r -> r.distKm).sum();
+            result.sm4 = Metrics.sm(sol4.routes);
+            result.nh4 = Metrics.nh(sol4.routes);
+            result.rtd4 = Metrics.rtd(sol4.routes);
+            result.time4Ms = (t2 - t1);
+
+            // Chạy Ch5 - Thuật toán phân cụm
+            long t3 = System.currentTimeMillis();
+            Solution sol5 = new ClusteringVRPTW(depot, dumps).solve(deepCopy(stops));
+            long t4 = System.currentTimeMillis();
+
+            result.v5 = sol5.routes.size();
+            result.td5 = sol5.routes.stream().mapToDouble(r -> r.distKm).sum();
+            result.sm5 = Metrics.sm(sol5.routes);
+            result.nh5 = Metrics.nh(sol5.routes);
+            result.rtd5 = Metrics.rtd(sol5.routes);
+            result.time5Ms = (t4 - t3);
+
+        } catch (Exception e) {
+            System.err.println("❌ Lỗi thuật toán tại file " + fileName + ": " + e.getMessage());
+        }
+
+        System.out.println("✔️ Đã chạy xong: " + fileName);
+        return result;
+    }
+
+    /**
+     * In ra giao diện Bảng (Table)
+     */
+    private static void printFinalReportTable(List<BenchmarkResult> results, long totalTime) {
+        System.out.println("\n╔════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗");
+        System.out.println("║                                 BẢNG KẾT QUẢ THỰC NGHIỆM (COMPUTATIONAL RESULTS)                               ║");
+        System.out.println("╠════════════════╦════╦══════╦══════════════╦══════╦══════════════╦════════════╦═══════════════╗");
+        System.out.println("║ Problem set    │ Algo │  Vn  │   Sm (km)    │  Nh  │   TD (km)    │  RTD (sec) │   CT (ms)     ║");
+        System.out.println("╠════════════════╬════╬══════╬══════════════╬══════╬══════════════╬════════════╬═══════════════╣");
+
+        // Sort file từ bé đến lớn (102 -> 2100)
+        results.sort(Comparator.comparingInt(a -> a.numStops));
+
+        for (BenchmarkResult r : results) {
+            if (r.numStops == 0) continue;
+            System.out.printf("║ %-14s │  1   │ %4d │ %12.2f │ %4d │ %12.1f │ %10d │ %13d ║%n",
+                    r.fileName, r.v4, r.sm4, r.nh4, r.td4, (int)r.rtd4, r.time4Ms);
+            System.out.printf("║ %-14s │  2   │ %4d │ %12.2f │ %4d │ %12.1f │ %10d │ %13d ║%n",
+                    "", r.v5, r.sm5, r.nh5, r.td5, (int)r.rtd5, r.time5Ms);
+            System.out.println("╟────────────────┼────┼──────┼──────────────┼──────┼──────────────┼────────────┼───────────────╢");
+        }
+        System.out.printf("║ TỔNG THỜI GIAN CHẠY TOÀN BỘ BENCHMARK (ĐA LUỒNG): %-52d ms ║%n", totalTime);
+        System.out.println("╚════════════════╩════╩══════╩══════════════╩══════╩══════════════╩════════════╩═══════════════╝");
+    }
+
+    // --- CÁC HÀM TIỆN ÍCH GIỮ NGUYÊN ---
     static int toS(int h, int m) { return h * 3600 + m * 60; }
     static String fmt(int s) { return String.format("%02d:%02d", s/3600, (s%3600)/60); }
-    static double dist(double x1, double y1, double x2, double y2) {
-        return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)); }
-    static int travel(double x1, double y1, double x2, double y2) {
-        return (int)(dist(x1,y1,x2,y2) / SPEED * 3600); }
-    static List<Stop> deepCopy(List<Stop> src) {
-        return src.stream().map(Stop::copy).collect(Collectors.toList()); }
-
+    static double dist(double x1, double y1, double x2, double y2) { return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)); }
+    static int travel(double x1, double y1, double x2, double y2) { return (int)(dist(x1,y1,x2,y2) / SPEED * 3600); }
+    static List<Stop> deepCopy(List<Stop> src) { return src.stream().map(Stop::copy).collect(Collectors.toList()); }
     static void banner(String t) {
         System.out.println("\n╔══════════════════════════════════════════════════════════╗");
         System.out.printf( "║  %-56s║%n", t);
         System.out.println("╚══════════════════════════════════════════════════════════╝");
     }
-    static void section(String t) {
-        System.out.println("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        System.out.println("  " + t);
-        System.out.println("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    }
-    static void printSol(String label, Solution sol) {
-        double td = sol.routes.stream().mapToDouble(r->r.distKm).sum();
-        System.out.printf("%n  ┌─ [%s] %d xe | TD=%.1fkm | Sm=%.4f | Nh=%d | RTD=%s%n",
-                label, sol.routes.size(), td,
-                Metrics.sm(sol.routes), Metrics.nh(sol.routes),
-                fmt((int)Metrics.rtd(sol.routes)));
-        for (Route r : sol.routes) {
-            String sl = r.stops.stream().map(s->s.id).collect(Collectors.joining("→"));
-            System.out.printf("  │  %-6s %.1fkm %ddump%s │ %s%n",
-                    r.id, r.distKm, r.dumpCount,
-                    r.lunchDone ? " lunch✓" : "       ",
-                    sl.isEmpty() ? "(trống)" : sl);
-        }
-        System.out.println("  └────────────────────────────────────────────────────────");
-    }
 
-    // ── Dữ liệu mẫu: 20 điểm dừng ───────────────────────────
-    static List<Stop> makeStops() {
-        Object[][] d = {
-                // id     x      y    early          late       svc  vol   wgt
-                {"S01",  2.0,  1.0, toS(7,0),   toS(9,0),   300, 1.5, 200},
-                {"S02",  3.0,  1.5, toS(7,30),  toS(9,30),  300, 2.0, 250},
-                {"S03",  4.0,  2.0, toS(8,0),   toS(10,0),  300, 2.5, 300},
-                {"S04",  1.0,  3.0, toS(8,0),   toS(10,30), 300, 1.0, 150},
-                {"S05", -1.0,  2.0, toS(9,0),   toS(11,0),  300, 3.0, 400},
-                {"S06", -2.0,  1.0, toS(9,30),  toS(11,30), 300, 2.5, 350},
-                {"S07", -3.0,  2.5, toS(10,0),  toS(12,0),  300, 2.0, 300},
-                {"S08",  0.5, -2.0, toS(13,0),  toS(15,0),  300, 1.5, 200},
-                {"S09",  2.0, -1.5, toS(13,30), toS(15,30), 300, 2.0, 250},
-                {"S10", -1.5, -2.0, toS(14,0),  toS(16,0),  300, 1.8, 220},
-                {"S11",  3.0, -3.0, toS(7,0),   toS(9,30),  300, 2.2, 270},
-                {"S12", -3.0, -1.0, toS(8,30),  toS(10,30), 300, 1.8, 230},
-                {"S13",  4.0, -1.0, toS(9,0),   toS(11,0),  300, 2.5, 310},
-                {"S14", -4.0,  1.0, toS(13,0),  toS(15,0),  300, 1.2, 180},
-                {"S15",  1.0,  4.0, toS(14,0),  toS(16,0),  300, 2.8, 350},
-                {"S16", -2.0,  4.0, toS(7,30),  toS(9,0),   300, 1.5, 190},
-                {"S17",  3.0,  3.0, toS(10,0),  toS(12,0),  300, 2.0, 240},
-                {"S18", -3.0, -3.0, toS(13,30), toS(15,30), 300, 1.8, 230},
-                {"S19",  2.0, -4.0, toS(8,0),   toS(10,0),  300, 2.3, 280},
-                {"S20",  0.0,  3.0, toS(9,0),   toS(11,30), 300, 1.0, 130},
-        };
-        List<Stop> list = new ArrayList<>();
-        for (Object[] row : d) list.add(new Stop(
-                (String)row[0],
-                ((Number)row[1]).doubleValue(), ((Number)row[2]).doubleValue(),
-                ((Number)row[3]).intValue(),    ((Number)row[4]).intValue(),
-                ((Number)row[5]).intValue(),
-                ((Number)row[6]).doubleValue(), ((Number)row[7]).doubleValue()));
-        return list;
+}
+
+class DataLoader {
+    public static List<Stop> loadStops(String fileName) {
+        List<Stop> stops = new ArrayList<>();
+        File file = new File("data/" + fileName);
+        if (!file.exists()) {
+            System.err.println("❌ Không tìm thấy file: " + file.getAbsolutePath());
+            return stops;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (line.trim().isEmpty() || line.trim().startsWith("//")) continue;
+
+                String[] p = line.trim().split("\\s+");
+                if (p.length >= 8) {
+                    stops.add(new Stop(p[0],
+                            Double.parseDouble(p[1]), Double.parseDouble(p[2]),
+                            Integer.parseInt(p[3]), Integer.parseInt(p[4]),
+                            Integer.parseInt(p[5]),
+                            Double.parseDouble(p[6]), Double.parseDouble(p[7])));
+                }
+            }
+        } catch (IOException e) {
+            System.err.println("❌ Lỗi đọc file " + fileName + ": " + e.getMessage());
+        }
+        return stops;
     }
 }
 
@@ -287,11 +340,16 @@ class ExtendedInsertion {
         boolean inserted = true;
         while (inserted) {
             inserted = false;
+            double currentVol = CR.stream().mapToDouble(s->s.vol).sum();
+            double currentWgt = CR.stream().mapToDouble(s->s.wgt).sum();
             Stop bestU = null; int bestPos = -1;
             double bestC2 = Double.NEGATIVE_INFINITY;
 
             for (Stop u : allStops) {
                 if (u.routed) continue;
+                if (currentVol + u.vol > Main.MAX_VOL || currentWgt + u.wgt > Main.MAX_WGT) {
+                    continue;
+                }
                 InsertResult res = findBestInsert(u, CR);
                 if (res == null) continue;
 
@@ -305,8 +363,8 @@ class ExtendedInsertion {
                 CR.add(bestPos, bestU);
                 bestU.routed = true;
                 inserted = true;
-                System.out.printf("  [Ch4]     Chèn %-4s vị trí %d (c2=%.3f)%n",
-                        bestU.id, bestPos, bestC2);
+//                System.out.printf("  [Ch4]     Chèn %-4s vị trí %d (c2=%.3f)%n",
+//                        bestU.id, bestPos, bestC2);
             }
         }
     }
@@ -555,7 +613,9 @@ class ClusteringVRPTW {
 
             // Sort theo TW sớm để ưu tiên gom stop cấp bách trước
             List<Stop> sorted = stops.stream()
-                    .sorted(Comparator.comparingInt(s->s.e))
+                    .sorted((a, b) -> Double.compare(
+                            Main.dist(b.x, b.y, gcX, gcY),
+                            Main.dist(a.x, a.y, gcX, gcY)))
                     .collect(Collectors.toList());
 
             for (Stop s : sorted) {
@@ -884,4 +944,20 @@ class Ch6Compare {
     static String pct(int a, int b) { return pct((double)a, (double)b); }
     static String f1(double v) { return String.format("%.1f", v); }
     static String f4(double v) { return String.format("%.4f", v); }
+}
+
+class BenchmarkResult {
+    String fileName;
+    int numStops;
+
+    // Kết quả Thuật toán Ch4 (Insertion)
+    int v4; double td4; double sm4; int nh4; double rtd4; long time4Ms;
+
+    // Kết quả Thuật toán Ch5 (Clustering)
+    int v5; double td5; double sm5; int nh5; double rtd5; long time5Ms;
+
+    public BenchmarkResult(String fileName, int numStops) {
+        this.fileName = fileName;
+        this.numStops = numStops;
+    }
 }
