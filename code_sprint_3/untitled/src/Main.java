@@ -125,7 +125,6 @@ public class Main {
         System.out.println("╚════════════════╩════╩══════╩══════════════╩══════╩══════════════╩════════════╩═══════════════╝");
     }
 
-    // --- CÁC HÀM TIỆN ÍCH GIỮ NGUYÊN ---
     static int toS(int h, int m) { return h * 3600 + m * 60; }
     static String fmt(int s) { return String.format("%02d:%02d", s/3600, (s%3600)/60); }
     static double dist(double x1, double y1, double x2, double y2) { return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)); }
@@ -883,68 +882,6 @@ class GrahamScan {
     }
 }
 
-class Ch6Compare {
-
-    static void run(Solution sol4, Solution sol5) {
-        // Tính các chỉ số
-        double sm4  = Metrics.sm(sol4.routes),  sm5  = Metrics.sm(sol5.routes);
-        int    nh4  = Metrics.nh(sol4.routes),   nh5  = Metrics.nh(sol5.routes);
-        double rtd4 = Metrics.rtd(sol4.routes), rtd5 = Metrics.rtd(sol5.routes);
-        double td4  = sol4.routes.stream().mapToDouble(r->r.distKm).sum();
-        double td5  = sol5.routes.stream().mapToDouble(r->r.distKm).sum();
-        int    n4   = sol4.routes.size(), n5 = sol5.routes.size();
-
-        System.out.println("\n  ┌─────────────────────────────────────────────────────────┐");
-        System.out.println("  │       BẢNG SO SÁNH HIỆU NĂNG    │");
-        System.out.println("  ├──────────────────────────┬─────────────┬────────────────┤");
-        System.out.printf( "  │ %-26s│ %-11s │ %-14s │%n",
-                "Chỉ số đánh giá", "Ch4-Insertion", "Ch5-Clustering");
-        System.out.println("  ├──────────────────────────┼─────────────┼────────────────┤");
-        printRow("Số xe dùng (Vn)",      n4+"",              n5+"",            pct(n4,n5));
-        printRow("Tổng quãng đường (km)", f1(td4),           f1(td5),          pct(td4,td5));
-        printRow("Độ gọn Sm",            f4(sm4),            f4(sm5),          pct(sm4,sm5));
-        printRow("Chồng lấp Nh (pts)",   nh4+"",             nh5+"",           pct(nh4,nh5));
-        printRow("Cân bằng RTD (giây)",  (int)rtd4+"",       (int)rtd5+"",     pct(rtd4,rtd5));
-        System.out.println("  └──────────────────────────┴─────────────┴────────────────┘");
-
-        // Phân tích & kết luận
-        System.out.println("\n  📊 PHÂN TÍCH CHI TIẾT:");
-        analyzeMetric("Sm (độ gọn gàng)", sm4, sm5, "nhỏ hơn",
-                "Tuyến Ch5 gọn hơn → xe phục vụ vùng địa lý riêng biệt");
-        analyzeMetric("Nh (chồng lấp hull)", nh4, nh5, "ít hơn",
-                "Ch5 loại bỏ 'mạng nhện' → ranh giới tuyến rõ ràng");
-        analyzeMetric("RTD (cân bằng tải)", rtd4, rtd5, "nhỏ hơn",
-                "Ch5 cân bằng khối lượng cho tài xế tốt hơn");
-        analyzeMetric("TD (tổng quãng đường)", td4, td5, "nhỏ hơn",
-                "Ch5 giảm chi phí nhiên liệu tổng thể");
-
-        System.out.println("\n  🏭 THỰC TIỄN:");
-        System.out.println("  ┌──────────────────────────────────────────────────────────┐");
-        System.out.println("  │  WasteRoute™ (Waste Management Inc, Bắc Mỹ)             │");
-        System.out.println("  │  • Áp dụng Ch5 (Clustering) vào sản xuất thực tế       │");
-        System.out.println("  │  • Giảm 984 tuyến xe → tiết kiệm hàng chục triệu USD   │");
-        System.out.println("  │  • Benchmark: 102 → 2100 stops, Ch5 nhanh hơn 40%      │");
-        System.out.println("  └──────────────────────────────────────────────────────────┘");
-    }
-
-    static void printRow(String label, String v4, String v5, String imp) {
-        System.out.printf("  │ %-26s│ %11s │ %14s │%n", label, v4, v5 + " " + imp);
-    }
-    static void analyzeMetric(String name, double v4, double v5, String dir, String note) {
-        double delta = v4==0 ? 0 : (v4-v5)/v4*100;
-        String sign = delta > 0 ? "▼" : "▲";
-        System.out.printf("  • %-28s Ch5 %s %.1f%% %s → %s%n",
-                name, sign, Math.abs(delta), dir, note);
-    }
-    static String pct(double a, double b) {
-        if (a == 0) return "";
-        double d = (a-b)/a*100;
-        return d > 0 ? String.format("▼%.0f%%",d) : String.format("▲%.0f%%",Math.abs(d));
-    }
-    static String pct(int a, int b) { return pct((double)a, (double)b); }
-    static String f1(double v) { return String.format("%.1f", v); }
-    static String f4(double v) { return String.format("%.4f", v); }
-}
 
 class BenchmarkResult {
     String fileName;
