@@ -11,7 +11,7 @@ public class DataSeeder {
 
     // Danh sách số lượng điểm dừng cần sinh ra theo yêu cầu bài báo
     private static final int[] FILE_SIZES = {102, 277, 335, 444, 804, 1051, 1351, 1599, 1932, 2100};
-    private static final String FOLDER_PATH = "data";
+    private static final String FOLDER_PATH = "data/raw-data";
 
     // Các hằng số giới hạn để sinh dữ liệu sao cho thực tế
     private static final double MIN_COORD = -20.0;

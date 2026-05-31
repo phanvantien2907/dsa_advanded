@@ -1,7 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="6261590a-a334-4041-af92-7b8c4f69b91c" name="Changes" comment="" />
+    <list default="true" id="6261590a-a334-4041-af92-7b8c4f69b91c" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/data/raw-data/102_stop.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/raw-data/1051_stop.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/raw-data/1351_stop.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/raw-data/1599_stop.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/raw-data/1932_stop.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/raw-data/2100_stop.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/raw-data/277_stop.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/raw-data/335_stop.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/raw-data/444_stop.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/raw-data/804_stop.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/102_stop.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/1051_stop.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/1351_stop.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/1599_stop.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/1932_stop.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/2100_stop.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/277_stop.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/335_stop.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/444_stop.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/804_stop.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/DataSeeder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/DataSeeder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -14,6 +41,9 @@
       </list>
     </option>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -22,17 +52,28 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Application.DataSeeder.executor": "Run",
-    "Application.Main.executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "kotlin-language-version-configured": "true",
-    "onboarding.tips.debug.path": "D:/working/VRPTW/code_sprint_3/untitled/src/Main.java"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Application.DataSeeder.executor&quot;: &quot;Run&quot;,
+    &quot;Application.Main.executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;onboarding.tips.debug.path&quot;: &quot;D:/working/VRPTW/code_sprint_3/untitled/src/Main.java&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\working\VRPTW\code_sprint_3\untitled\data\raw-data" />
+    </key>
+  </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="6261590a-a334-4041-af92-7b8c4f69b91c" name="Changes" comment="" />
@@ -47,8 +88,27 @@
       <workItem from="1775528115207" duration="73000" />
       <workItem from="1775549061728" duration="1576000" />
       <workItem from="1775631011240" duration="288000" />
-      <workItem from="1775632126233" duration="8241000" />
+      <workItem from="1775632126233" duration="8632000" />
+      <workItem from="1775652784143" duration="5092000" />
+      <workItem from="1775696417821" duration="2171000" />
+      <workItem from="1776174207017" duration="837000" />
+      <workItem from="1776238105132" duration="2393000" />
+      <workItem from="1776260916418" duration="4770000" />
+      <workItem from="1776300803935" duration="2832000" />
+      <workItem from="1776408182897" duration="1351000" />
+      <workItem from="1776404829796" duration="2664000" />
+      <workItem from="1776475024178" duration="1104000" />
+      <workItem from="1776499781308" duration="37000" />
+      <workItem from="1776520697649" duration="6000" />
+      <workItem from="1776581488607" duration="269000" />
+      <workItem from="1776582055538" duration="1115000" />
+      <workItem from="1776696093285" duration="473000" />
+      <workItem from="1776696577864" duration="694000" />
     </task>
     <servers />
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>
