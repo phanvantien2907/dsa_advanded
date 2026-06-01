@@ -140,7 +140,7 @@ class BenchmarkResult {
 class DataLoader {
     public static List<Stop> loadStops(String fileName) {
         List<Stop> stops = new ArrayList<>();
-        File file = new File("data/" + fileName);
+        File file = new File("data/raw-data/" + fileName);
         if (!file.exists()) {
             System.err.println("❌ Không tìm thấy file: " + file.getAbsolutePath());
             return stops;
@@ -495,16 +495,16 @@ class ClusteringVRPTW {
 
     Depot depot; List<DumpSite> dumps;
     static final double MAX_VOL_DAY = Main.MAX_VOL * 2; // 2 chuyến/ngày
-    static final String CLUSTER_DIR = "data/clusters/";
+    static final String CLUSTER_OUT_DIR = "data/clusters/";
 
     ClusteringVRPTW(Depot d, List<DumpSite> ds) { depot=d; dumps=ds; }
 
     /**
      * Pipeline:
      * 1. Load stops từ fileName
-     * 2. Phân cụm K-means
-     * 3. Ghi mỗi cluster ra file .txt tạm (data/clusters/)
-     * 4. Load lại từng file cluster → feed vào ExtendedInsertion
+     * 2. Phân cụm K-means (N cụm)
+     * 3. Ghi TẤT CẢ cluster vào 1 file duy nhất (cùng định dạng gốc)
+     * 4. Dùng thẳng cluster.stops trong memory → ExtendedInsertion
      * 5. Tổng hợp kết quả và render ra console
      */
     Solution solve(String fileName) throws IOException {
@@ -515,13 +515,12 @@ class ClusteringVRPTW {
         List<Stop> stops = DataLoader.loadStops(fileName);
         if (stops.isEmpty()) throw new IOException("Không tải được dữ liệu: " + fileName);
 
-        double totalVol = stops.stream().mapToDouble(s->s.vol).sum();
-        int N = Math.max(2, (int)Math.ceil(totalVol / MAX_VOL_DAY));
+        double totalVol = stops.stream().mapToDouble(s -> s.vol).sum();
+        int N = Math.max(2, (int) Math.ceil(totalVol / MAX_VOL_DAY));
         System.out.printf("  [Ch5]   Tổng stops=%d | TotalVol=%.1fm³ → N=%d xe ước tính%n",
                 stops.size(), totalVol, N);
 
-        // Tạo thư mục cluster nếu chưa có
-        new File(CLUSTER_DIR).mkdirs();
+        new File(CLUSTER_OUT_DIR).mkdirs();
 
         List<Route> finalRoutes = null;
 
@@ -533,38 +532,26 @@ class ClusteringVRPTW {
             System.out.println("  [Ch5]   Cải thiện compactness (swap points)...");
             improveCompactness(clusters);
 
-            clusters.sort((a,b) -> b.stops.size() - a.stops.size());
-            for (int i=0; i<clusters.size(); i++) clusters.get(i).id = i+1;
+            clusters.sort((a, b) -> b.stops.size() - a.stops.size());
+            for (int i = 0; i < clusters.size(); i++) clusters.get(i).id = i + 1;
 
-            // ── BƯỚC 2: Ghi mỗi cluster ra file .txt ──
-            System.out.println("  [Ch5] Bước 2: Ghi cluster files...");
-            String baseFile = fileName.replace(".txt", "");
-            List<String> clusterFiles = new ArrayList<>();
-            for (Cluster cluster : clusters) {
-                String cfName = baseFile + "_cluster" + cluster.id + ".txt";
-                String cfPath = CLUSTER_DIR + cfName;
-                writeClusterFile(cfPath, cluster.stops);
-                clusterFiles.add(cfPath);
-                System.out.printf("  [Ch5]   Đã ghi Cụm %d (%d stops) → %s%n",
-                        cluster.id, cluster.stops.size(), cfPath);
-            }
+            // ── BƯỚC 2: Ghi TẤT CẢ cluster vào 1 file duy nhất ──
+            String outPath = CLUSTER_OUT_DIR + fileName.replace(".txt", "_clustered.txt");
+            writeMergedClusterFile(outPath, clusters, fileName);
+            System.out.printf("  [Ch5] Bước 2: Đã ghi %d cụm → 1 file: %s%n", clusters.size(), outPath);
 
-            // ── BƯỚC 3: Load lại từng cluster file → ExtendedInsertion ──
+            // ── BƯỚC 3: Dùng thẳng in-memory cluster.stops → ExtendedInsertion ──
             System.out.println("  [Ch5] Bước 3: Chạy ExtendedInsertion trên từng cluster...");
             List<Route> routes = new ArrayList<>();
             List<Stop> unassigned = new ArrayList<>();
             int vId = 0;
 
-            for (int ci = 0; ci < clusters.size(); ci++) {
-                Cluster cluster = clusters.get(ci);
-                String cfPath = clusterFiles.get(ci);
-
-                // Load lại stops từ cluster file
-                List<Stop> clusterStops = DataLoader.loadStopsFromPath(cfPath);
+            for (Cluster cluster : clusters) {
+                List<Stop> clusterStops = new ArrayList<>(cluster.stops);
                 clusterStops.forEach(s -> s.routed = false);
 
-                System.out.printf("  [Ch5]   Cụm %d (%d stops, vol=%.1f):  load từ %s%n",
-                        cluster.id, clusterStops.size(), cluster.totalVol(), cfPath);
+                System.out.printf("  [Ch5]   Cụm %d (%d stops, vol=%.1f, c=(%.1f,%.1f)):%n",
+                        cluster.id, clusterStops.size(), cluster.totalVol(), cluster.cx, cluster.cy);
 
                 ExtendedInsertion ei = new ExtendedInsertion(depot, dumps);
                 ei.vehicleCount = vId;
@@ -591,18 +578,13 @@ class ClusteringVRPTW {
             for (Stop s : unassigned) {
                 Cluster best = clusters.stream()
                         .filter(c -> !c.finalized)
-                        .min(Comparator.comparingDouble(c -> Main.dist(s.x,s.y,c.cx,c.cy)))
-                        .orElse(clusters.get(clusters.size()-1));
+                        .min(Comparator.comparingDouble(c -> Main.dist(s.x, s.y, c.cx, c.cy)))
+                        .orElse(clusters.get(clusters.size() - 1));
                 best.stops.add(s);
                 System.out.printf("  [Ch5]   Reassign %s → Cụm %d%n", s.id, best.id);
             }
 
             // ── BƯỚC 4: Kiểm tra còn stop nào chưa lên tuyến? ──
-            long stillUnrouted = routes.stream()
-                    .flatMap(r -> r.stops.stream())
-                    .count();
-            long expectedTotal = stops.size() - unassigned.size();
-            // Kiểm tra theo unassigned còn lại sau reassign
             if (unassigned.isEmpty()) {
                 System.out.printf("  [Ch5] Bước 4: Tất cả stops đã lên tuyến ✓%n");
                 finalRoutes = routes;
@@ -611,7 +593,6 @@ class ClusteringVRPTW {
                 N++;
                 System.out.printf("  [Ch5] Bước 4: Còn %d stops → Tăng N=%d, phân cụm lại!%n",
                         unassigned.size(), N);
-                // Reset routed flag trên stops gốc
                 stops.forEach(s -> s.routed = false);
             }
         }
@@ -622,12 +603,24 @@ class ClusteringVRPTW {
         return new Solution(finalRoutes);
     }
 
-    /** Ghi danh sách stops ra file text (định dạng tương tự input). */
-    private void writeClusterFile(String path, List<Stop> stops) throws IOException {
-        try (java.io.PrintWriter pw = new java.io.PrintWriter(new java.io.FileWriter(path))) {
-            for (Stop s : stops) {
-                pw.printf("%s %.4f %.4f %d %d %d %.4f %.4f%n",
-                        s.id, s.x, s.y, s.e, s.l, s.svc, s.vol, s.wgt);
+    /**
+     * Ghi TẤT CẢ cluster vào 1 file duy nhất, cùng định dạng file gốc.
+     * Mỗi cluster có 1 dòng comment phân chia: // === Cluster {id} ===
+     */
+    private void writeMergedClusterFile(String outPath, List<Cluster> clusters,
+                                        String sourceFileName) throws IOException {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(outPath))) {
+            pw.printf("//ID    X        Y        EarlyStart(s)    LateStart(s)    Svc(s)    Vol(m3) Wgt(kg)%n");
+            pw.printf("// Source: %s | Clusters: %d%n", sourceFileName, clusters.size());
+            pw.printf("//----------------------------------------------------------%n");
+            for (Cluster cluster : clusters) {
+                pw.printf("%n// === Cluster %d (%d stops, vol=%.1fm3, center=(%.2f,%.2f)) ===%n",
+                        cluster.id, cluster.stops.size(), cluster.totalVol(),
+                        cluster.cx, cluster.cy);
+                for (Stop s : cluster.stops) {
+                    pw.printf("%-8s %8.1f %8.1f %12d %12d %8d %8.1f %8.1f%n",
+                            s.id, s.x, s.y, s.e, s.l, s.svc, s.vol, s.wgt);
+                }
             }
         }
     }

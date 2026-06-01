@@ -5,28 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6261590a-a334-4041-af92-7b8c4f69b91c" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/data/raw-data/102_stop.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw-data/1051_stop.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw-data/1351_stop.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw-data/1599_stop.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw-data/1932_stop.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw-data/2100_stop.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw-data/277_stop.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw-data/335_stop.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw-data/444_stop.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data/raw-data/804_stop.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/102_stop.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/1051_stop.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/1351_stop.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/1599_stop.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/1932_stop.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/2100_stop.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/277_stop.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/335_stop.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/444_stop.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/804_stop.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/DataSeeder.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/DataSeeder.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
